@@ -1,0 +1,40 @@
+name: Test OpenWrt 25.12.5 SDK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-sdk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install zstd
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zstd
+
+      - name: Download OpenWrt SDK
+        run: |
+          wget -q --show-progress \
+            https://downloads.openwrt.org/releases/25.12.5/targets/qualcommax/ipq807x/openwrt-sdk-25.12.5-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst
+
+      - name: Verify SDK checksum
+        run: |
+          echo "7aabdda8607c372cb0fd526f0eede2f680ae7d95a4758a38bbb49381e5c97621  openwrt-sdk-25.12.5-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst" | sha256sum -c -
+
+      - name: Extract SDK
+        run: |
+          mkdir sdk
+          tar --zstd \
+            -xf openwrt-sdk-25.12.5-qualcommax-ipq807x_gcc-14.3.0_musl.Linux-x86_64.tar.zst \
+            -C sdk \
+            --strip-components=1
+
+      - name: Check SDK
+        run: |
+          echo "===== SDK extracted successfully ====="
+          cd sdk
+          pwd
+          ls -la | head -30
+          echo "===== Target configuration ====="
+          grep -E 'CONFIG_TARGET_qualcommax|CONFIG_TARGET_qualcommax_ipq807x' .config || true
