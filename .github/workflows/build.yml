@@ -58,6 +58,12 @@ jobs:
             echo "# CONFIG_${opt} is not set" >> .config
           done
 
+          # Xóa các package module dư có sẵn trong cấu hình SDK
+          sed -i '/^CONFIG_PACKAGE_.*=m$/d' .config
+
+          # Chuẩn hóa lại cấu hình sau khi dọn module
+          make defconfig
+
           set_y() {
             sed -i "/^CONFIG_$1=/d" .config
             sed -i "/^# CONFIG_$1 is not set/d" .config
@@ -71,6 +77,7 @@ jobs:
           }
     
           # Loại bỏ các variant/dependency không cần cho FFmpeg custom
+          set_n PACKAGE_go2rtc
           set_n PACKAGE_ffmpeg
           set_n PACKAGE_ffprobe
           set_n PACKAGE_libffmpeg-full
@@ -113,7 +120,7 @@ jobs:
           echo "===== Output ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
           echo "===== Unwanted packages ====="
-          grep -E '^CONFIG_PACKAGE_(ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
+          grep -E '^CONFIG_PACKAGE_(go2rtc|ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
 
           echo "===== TLS / GnuTLS / Nettle ====="
           grep -Ei '^(CONFIG_.*(GNUTLS|NETTLE|TLS).*)' .config || true
