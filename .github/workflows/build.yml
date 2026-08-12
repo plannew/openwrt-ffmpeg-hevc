@@ -50,11 +50,13 @@ jobs:
           cd sdk
 
           make defconfig
-          
-          # libffmpeg-custom không khả dụng khi CONFIG_ALL=y
-          sed -i '/^CONFIG_ALL=/d' .config
-          sed -i '/^# CONFIG_ALL is not set/d' .config
-          echo '# CONFIG_ALL is not set' >> .config
+     
+          # Tắt chế độ build hàng loạt package của SDK
+          for opt in ALL BUILDBOT ALL_NONSHARED ALL_KMODS; do
+            sed -i "/^CONFIG_${opt}=/d" .config
+            sed -i "/^# CONFIG_${opt} is not set/d" .config
+            echo "# CONFIG_${opt} is not set" >> .config
+          done
 
           set_y() {
             sed -i "/^CONFIG_$1=/d" .config
