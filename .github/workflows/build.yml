@@ -62,6 +62,22 @@ jobs:
             echo "CONFIG_$1=y" >> .config
           }
 
+          set_n() {
+            sed -i "/^CONFIG_$1=/d" .config
+            sed -i "/^# CONFIG_$1 is not set/d" .config
+            echo "# CONFIG_$1 is not set" >> .config
+          }
+    
+          # Loại bỏ các variant/dependency không cần cho FFmpeg custom
+          set_n PACKAGE_ffmpeg
+          set_n PACKAGE_ffprobe
+          set_n PACKAGE_libffmpeg-full
+          set_n PACKAGE_libffmpeg-mini
+          set_n PACKAGE_libffmpeg-audio-dec
+
+          set_n PACKAGE_libgnutls-dane
+          set_n PACKAGE_libunbound
+
           set_y PACKAGE_libffmpeg-custom
 
           # Tùy chọn này tự chọn ffmpeg-custom + ffprobe-custom
@@ -94,6 +110,8 @@ jobs:
 
           echo "===== Output ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
+          echo "===== Unwanted packages ====="
+          grep -E '^CONFIG_PACKAGE_(ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
 
       - name: Build custom FFmpeg packages
         run: |
