@@ -41,6 +41,9 @@ jobs:
         run: |
           cd sdk
 
+          ./scripts/config --disable ALL
+          make defconfig
+          
           set_y() {
             sed -i "/^CONFIG_$1=/d" .config
             sed -i "/^# CONFIG_$1 is not set/d" .config
