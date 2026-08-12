@@ -113,6 +113,14 @@ jobs:
           echo "===== Unwanted packages ====="
           grep -E '^CONFIG_PACKAGE_(ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
 
+          echo "===== TLS / GnuTLS / Nettle ====="
+          grep -Ei '^(CONFIG_.*(GNUTLS|NETTLE|TLS).*)' .config || true
+
+          echo "===== FFmpeg source references to GnuTLS ====="
+          grep -RniE 'gnutls|nettle' \
+          feeds/packages/multimedia/ffmpeg/Makefile \
+          feeds/packages/multimedia/ffmpeg/Config.in || true
+
       - name: Build custom FFmpeg packages
         run: |
           cd sdk
