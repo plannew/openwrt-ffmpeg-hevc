@@ -1,10 +1,10 @@
-name: Prepare OpenWrt 25.12.5 SDK
+name: Configure FFmpeg HEVC
 
 on:
   workflow_dispatch:
 
 jobs:
-  prepare-sdk:
+  configure-ffmpeg:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,18 +35,46 @@ jobs:
           cd sdk
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-
-      - name: Generate SDK config
-        run: |
-          cd sdk
           make defconfig
 
-      - name: Check configuration
+      - name: Configure custom FFmpeg
         run: |
           cd sdk
-          echo "===== .config exists ====="
-          ls -lh .config
-          echo "===== target ====="
-          grep -E 'CONFIG_TARGET_qualcommax|CONFIG_TARGET_qualcommax_ipq807x' .config || true
-          echo "===== ffmpeg packages ====="
-          ./scripts/feeds search ffmpeg | head -30 || true
+
+          set_y() {
+            sed -i "/^CONFIG_$1=/d" .config
+            sed -i "/^# CONFIG_$1 is not set/d" .config
+            echo "CONFIG_$1=y" >> .config
+          }
+
+          set_y PACKAGE_libffmpeg-custom
+          set_y PACKAGE_ffmpeg-custom
+          set_y PACKAGE_ffprobe-custom
+
+          set_y FFMPEG_CUSTOM_PATENTED
+          set_y FFMPEG_CUSTOM_PARSER_hevc
+
+          set_y FFMPEG_CUSTOM_DEMUXER_rtsp
+          set_y FFMPEG_CUSTOM_PROTOCOL_tcp
+          set_y FFMPEG_CUSTOM_PROTOCOL_file
+
+          set_y FFMPEG_CUSTOM_MUXER_mpegts
+          set_y FFMPEG_CUSTOM_MUXER_mp4
+
+          make defconfig
+
+      - name: Check custom FFmpeg configuration
+        run: |
+          cd sdk
+
+          echo "===== Packages ====="
+          grep -E '^CONFIG_PACKAGE_(libffmpeg-custom|ffmpeg-custom|ffprobe-custom)=' .config
+
+          echo "===== HEVC ====="
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(PATENTED|PARSER_hevc|DECODER_hevc)=' .config
+
+          echo "===== RTSP input ====="
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(DEMUXER_rtsp|PROTOCOL_tcp)=' .config
+
+          echo "===== Output ====="
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
