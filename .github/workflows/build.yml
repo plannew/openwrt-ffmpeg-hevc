@@ -49,9 +49,13 @@ jobs:
         run: |
           cd sdk
 
-          ./scripts/config --disable ALL
           make defconfig
           
+          # libffmpeg-custom không khả dụng khi CONFIG_ALL=y
+          sed -i '/^CONFIG_ALL=/d' .config
+          sed -i '/^# CONFIG_ALL is not set/d' .config
+          echo '# CONFIG_ALL is not set' >> .config
+
           set_y() {
             sed -i "/^CONFIG_$1=/d" .config
             sed -i "/^# CONFIG_$1 is not set/d" .config
@@ -59,8 +63,9 @@ jobs:
           }
 
           set_y PACKAGE_libffmpeg-custom
-          set_y PACKAGE_ffmpeg-custom
-          set_y PACKAGE_ffprobe-custom
+
+          # Tùy chọn này tự chọn ffmpeg-custom + ffprobe-custom
+          set_y FFMPEG_CUSTOM_PROGRAMS
 
           set_y FFMPEG_CUSTOM_PATENTED
           set_y FFMPEG_CUSTOM_PARSER_hevc
@@ -71,7 +76,7 @@ jobs:
 
           set_y FFMPEG_CUSTOM_MUXER_mpegts
           set_y FFMPEG_CUSTOM_MUXER_mp4
-
+          
           make defconfig
 
       - name: Check custom FFmpeg configuration
