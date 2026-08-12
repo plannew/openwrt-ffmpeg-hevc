@@ -1,17 +1,17 @@
-name: Test OpenWrt 25.12.5 SDK
+name: Prepare OpenWrt 25.12.5 SDK
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-sdk:
+  prepare-sdk:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install zstd
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y zstd
+          sudo apt-get install -y zstd build-essential libncurses-dev gawk gettext rsync unzip file python3
 
       - name: Download OpenWrt SDK
         run: |
@@ -30,11 +30,23 @@ jobs:
             -C sdk \
             --strip-components=1
 
-      - name: Check SDK
+      - name: Update and install feeds
         run: |
-          echo "===== SDK extracted successfully ====="
           cd sdk
-          pwd
-          ls -la | head -30
-          echo "===== Target configuration ====="
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Generate SDK config
+        run: |
+          cd sdk
+          make defconfig
+
+      - name: Check configuration
+        run: |
+          cd sdk
+          echo "===== .config exists ====="
+          ls -lh .config
+          echo "===== target ====="
           grep -E 'CONFIG_TARGET_qualcommax|CONFIG_TARGET_qualcommax_ipq807x' .config || true
+          echo "===== ffmpeg packages ====="
+          ./scripts/feeds search ffmpeg | head -30 || true
