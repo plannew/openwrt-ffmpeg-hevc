@@ -128,9 +128,17 @@ jobs:
 
           echo "===== Global SDK disabled flags ====="
           grep -E '^# CONFIG_(ALL|ALL_NONSHARED|ALL_KMODS|DEVEL|BUILDBOT|AUTOREMOVE|SDK|MAKE_TOOLCHAIN) is not set' .config || true
-          
 
-      - name: Build custom FFmpeg packages
-        run: |
-          cd sdk
-          make package/feeds/packages/ffmpeg/compile V=s
+          echo "===== Reverse selectors ====="
+          grep -nE 'select PACKAGE_(ffmpeg|libffmpeg-full|libunbound|libgnutls)([^A-Za-z0-9_-]|$)' \
+            tmp/.config-package.in || true
+
+          echo "===== Kconfig definitions ====="
+          for pkg in ffmpeg libffmpeg-full libunbound libgnutls; do
+            echo "----- PACKAGE_${pkg} -----"
+            grep -n -A15 -B2 "^config PACKAGE_${pkg}$" \
+              tmp/.config-package.in || true
+          done
+          
+          - name: Build custom FFmpeg packages
+            if: ${{ false }}
