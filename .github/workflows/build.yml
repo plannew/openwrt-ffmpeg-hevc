@@ -155,7 +155,6 @@ jobs:
             tmp/.config-package.in || true
 
       - name: Build custom FFmpeg packages
-        if: ${{ false }}
         run: |
           cd sdk
           make package/feeds/packages/ffmpeg/compile V=s
