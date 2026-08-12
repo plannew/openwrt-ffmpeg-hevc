@@ -132,13 +132,23 @@ jobs:
           echo "===== Reverse selectors ====="
           grep -nE 'select PACKAGE_(ffmpeg|libffmpeg-full|libunbound|libgnutls)([^A-Za-z0-9_-]|$)' \
             tmp/.config-package.in || true
-
-          echo "===== Kconfig definitions ====="
-          for pkg in ffmpeg libffmpeg-full libunbound libgnutls; do
-            echo "----- PACKAGE_${pkg} -----"
-            grep -n -A15 -B2 "^config PACKAGE_${pkg}$" \
-              tmp/.config-package.in || true
-          done
           
-          - name: Build custom FFmpeg packages
-            if: ${{ false }}
+          echo "===== Selector owners ====="
+
+          grep -n -B8 -A2 'select PACKAGE_libffmpeg-full' \
+            tmp/.config-package.in || true
+
+          grep -n -B8 -A2 'select PACKAGE_ffmpeg' \
+            tmp/.config-package.in || true
+
+          grep -n -B8 -A2 'select PACKAGE_libunbound' \
+            tmp/.config-package.in || true
+
+          grep -n -B8 -A2 'select PACKAGE_libgnutls' \
+            tmp/.config-package.in || true
+
+      - name: Build custom FFmpeg packages
+        if: ${{ false }}
+        run: |
+          cd sdk
+          make package/feeds/packages/ffmpeg/compile V=s
