@@ -118,8 +118,15 @@ jobs:
 
           echo "===== FFmpeg source references to GnuTLS ====="
           grep -RniE 'gnutls|nettle' \
-          feeds/packages/multimedia/ffmpeg/Makefile \
-          feeds/packages/multimedia/ffmpeg/Config.in || true
+            feeds/packages/multimedia/ffmpeg/Makefile \
+            feeds/packages/multimedia/ffmpeg/Config.in || true
+            
+          echo "===== Global SDK build flags ====="
+          grep -E '^(CONFIG_(ALL|ALL_NONSHARED|ALL_KMODS|DEVEL|BUILDBOT|AUTOREMOVE|SDK|MAKE_TOOLCHAIN))=' .config || true
+
+          echo "===== Global SDK disabled flags ====="
+          grep -E '^# CONFIG_(ALL|ALL_NONSHARED|ALL_KMODS|DEVEL|BUILDBOT|AUTOREMOVE|SDK|MAKE_TOOLCHAIN) is not set' .config || true
+          
 
       - name: Build custom FFmpeg packages
         run: |
