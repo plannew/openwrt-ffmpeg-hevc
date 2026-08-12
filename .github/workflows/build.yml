@@ -94,3 +94,8 @@ jobs:
 
           echo "===== Output ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
+
+      - name: Build custom FFmpeg packages
+        run: |
+          cd sdk
+          make package/feeds/packages/ffmpeg/compile V=s
