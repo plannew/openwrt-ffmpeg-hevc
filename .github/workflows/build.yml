@@ -52,7 +52,7 @@ jobs:
           # Chỉ giữ các FFmpeg custom variants trong lần build này
           FFMPEG_MK="feeds/packages/multimedia/ffmpeg/Makefile"
           # Bump release để MX4200 nhận đây là bản nâng cấp mới
-          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=4/' "$FFMPEG_MK"
+          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=5/' "$FFMPEG_MK"
 
           echo "===== FFmpeg package release ====="
           grep -n '^PKG_RELEASE:=' "$FFMPEG_MK"
@@ -128,8 +128,13 @@ jobs:
           # H.264 / AVC
           set_y FFMPEG_CUSTOM_DECODER_h264
           set_y FFMPEG_CUSTOM_PARSER_h264
-      
 
+          # Input demuxers bổ sung
+          set_y FFMPEG_CUSTOM_DEMUXER_h264
+          set_y FFMPEG_CUSTOM_DEMUXER_hevc
+          set_y FFMPEG_CUSTOM_DEMUXER_matroska
+
+          # RTSP input
           set_y FFMPEG_CUSTOM_DEMUXER_rtsp
           set_y FFMPEG_CUSTOM_PROTOCOL_tcp
           set_y FFMPEG_CUSTOM_PROTOCOL_file
@@ -149,8 +154,8 @@ jobs:
           echo "===== H264 / HEVC ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(PATENTED|DECODER_h264|PARSER_h264|DECODER_hevc|PARSER_hevc)=' .config
 
-          echo "===== RTSP input ====="
-          grep -E '^CONFIG_FFMPEG_CUSTOM_(DEMUXER_rtsp|PROTOCOL_tcp)=' .config
+          echo "===== Input demuxers / RTSP ====="
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(DEMUXER_h264|DEMUXER_hevc|DEMUXER_matroska|DEMUXER_rtsp|PROTOCOL_tcp)=' .config
 
           echo "===== Output ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
