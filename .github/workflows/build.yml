@@ -158,6 +158,15 @@ jobs:
 
           echo "===== FFmpeg Makefile lines 430-510 ====="
           nl -ba feeds/packages/multimedia/ffmpeg/Makefile | sed -n '430,510p'
+
+          echo "===== FFmpeg BuildPackage registrations ====="
+          grep -nE 'BuildPackage,' \
+            feeds/packages/multimedia/ffmpeg/Makefile || true
+
+          echo "===== FFmpeg program package definitions ====="
+          grep -n -A15 -B2 -E \
+            '^define Package/(ffmpeg|ffprobe|ffmpeg-custom|ffprobe-custom)$' \
+            feeds/packages/multimedia/ffmpeg/Makefile || true
       - name: Build custom FFmpeg packages
         if: ${{ false }}
         run: |
