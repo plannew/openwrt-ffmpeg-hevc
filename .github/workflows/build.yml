@@ -52,7 +52,7 @@ jobs:
           # Chỉ giữ các FFmpeg custom variants trong lần build này
           FFMPEG_MK="feeds/packages/multimedia/ffmpeg/Makefile"
           # Bump release để MX4200 nhận đây là bản nâng cấp mới
-          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=3/' "$FFMPEG_MK"
+          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=4/' "$FFMPEG_MK"
 
           echo "===== FFmpeg package release ====="
           grep -n '^PKG_RELEASE:=' "$FFMPEG_MK"
@@ -65,12 +65,11 @@ jobs:
           sed -i 's/+libpthread +zlib +libbz2/+libpthread/' "$FFMPEG_MK"
           sed -i 's/--enable-zlib/--disable-zlib/' "$FFMPEG_MK"
 
-          # Chèn segment đúng vào block cấu hình custom duy nhất,
-          # ngay trước định nghĩa FFMPEG_ENABLE
-          sed -i '/^[[:space:]]*FFMPEG_ENABLE=/i\  FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
+          # Bật segment SAU --disable-everything để không bị tắt lại
+          sed -i '/--disable-everything \\/a\		--enable-muxer=segment \\' "$FFMPEG_MK"
 
-          echo "===== Forced segment muxer ====="
-          grep -nF -B3 -A5 'FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
+          echo "===== Segment position ====="
+          grep -nF -B3 -A5 -- '--disable-everything' "$FFMPEG_MK"
 
           echo "===== FFmpeg custom compression dependencies ====="
           grep -nE 'DEPENDS.*(zlib|libbz2)|--(enable|disable)-zlib' "$FFMPEG_MK" || true
