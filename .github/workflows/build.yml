@@ -56,6 +56,12 @@ jobs:
             sed -i "/BuildPackage,${pkg}))/s/^/# custom-only: /" "$FFMPEG_MK"
           done
 
+          # FFmpeg custom tối thiểu không cần zlib/libbz2
+          sed -i 's/+libpthread +zlib +libbz2/+libpthread/' "$FFMPEG_MK"
+          sed -i 's/--enable-zlib/--disable-zlib/' "$FFMPEG_MK"
+
+          echo "===== FFmpeg custom compression dependencies ====="
+          grep -nE 'DEPENDS.*(zlib|libbz2)|--(enable|disable)-zlib' "$FFMPEG_MK" || true
           echo "===== Active FFmpeg BuildPackage registrations ====="
           grep -nE '^[[:space:]]*\$\(eval \$\(call BuildPackage,' "$FFMPEG_MK"
       
