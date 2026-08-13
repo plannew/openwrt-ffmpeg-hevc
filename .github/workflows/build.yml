@@ -65,11 +65,12 @@ jobs:
           sed -i 's/+libpthread +zlib +libbz2/+libpthread/' "$FFMPEG_MK"
           sed -i 's/--enable-zlib/--disable-zlib/' "$FFMPEG_MK"
 
-          # Segment muxer không được Kconfig custom giữ lại, ép trực tiếp cho custom variant
-          sed -i '/^ifeq ($(BUILD_VARIANT),custom)$/a\  FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
+          # Chèn segment đúng vào block cấu hình custom duy nhất,
+          # ngay trước định nghĩa FFMPEG_ENABLE
+          sed -i '/^[[:space:]]*FFMPEG_ENABLE=/i\  FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
 
           echo "===== Forced segment muxer ====="
-          grep -nF -A3 'ifeq ($(BUILD_VARIANT),custom)' "$FFMPEG_MK"
+          grep -nF -B3 -A5 'FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
 
           echo "===== FFmpeg custom compression dependencies ====="
           grep -nE 'DEPENDS.*(zlib|libbz2)|--(enable|disable)-zlib' "$FFMPEG_MK" || true
