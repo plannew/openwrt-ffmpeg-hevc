@@ -178,7 +178,6 @@ jobs:
             '^define Package/(ffmpeg|ffprobe|ffmpeg-custom|ffprobe-custom)$' \
             feeds/packages/multimedia/ffmpeg/Makefile || true
       - name: Build custom FFmpeg packages
-        if: ${{ false }}
         run: |
           cd sdk
           make package/feeds/packages/ffmpeg/compile V=s
