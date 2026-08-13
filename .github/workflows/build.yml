@@ -187,3 +187,22 @@ jobs:
         run: |
           cd sdk
           make package/feeds/packages/ffmpeg/compile V=s
+
+      - name: List built FFmpeg APKs
+        run: |
+          find sdk/bin/packages/aarch64_cortex-a53/packages \
+            -maxdepth 1 -type f \
+            \( -name 'libffmpeg-custom-*.apk' \
+            -o -name 'ffmpeg-custom-*.apk' \
+            -o -name 'ffprobe-custom-*.apk' \) \
+            -ls
+
+      - name: Upload MX4200 FFmpeg APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: mx4200-ffmpeg-hevc-openwrt-25.12.5
+          path: |
+            sdk/bin/packages/aarch64_cortex-a53/packages/libffmpeg-custom-*.apk
+            sdk/bin/packages/aarch64_cortex-a53/packages/ffmpeg-custom-*.apk
+            sdk/bin/packages/aarch64_cortex-a53/packages/ffprobe-custom-*.apk
+          if-no-files-found: error
