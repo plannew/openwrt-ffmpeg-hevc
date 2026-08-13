@@ -51,6 +51,11 @@ jobs:
 
           # Chỉ giữ các FFmpeg custom variants trong lần build này
           FFMPEG_MK="feeds/packages/multimedia/ffmpeg/Makefile"
+          # Bump release để MX4200 nhận đây là bản nâng cấp mới
+          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=2/' "$FFMPEG_MK"
+
+          echo "===== FFmpeg package release ====="
+          grep -n '^PKG_RELEASE:=' "$FFMPEG_MK"
 
           for pkg in ffmpeg ffprobe libffmpeg-audio-dec libffmpeg-full libffmpeg-mini; do
             sed -i "/BuildPackage,${pkg}))/s/^/# custom-only: /" "$FFMPEG_MK"
@@ -109,7 +114,15 @@ jobs:
           set_y FFMPEG_CUSTOM_PROGRAMS
 
           set_y FFMPEG_CUSTOM_PATENTED
+
+          # H.265 / HEVC
+          set_y FFMPEG_CUSTOM_DECODER_hevc
           set_y FFMPEG_CUSTOM_PARSER_hevc
+
+          # H.264 / AVC
+          set_y FFMPEG_CUSTOM_DECODER_h264
+          set_y FFMPEG_CUSTOM_PARSER_h264
+      
 
           set_y FFMPEG_CUSTOM_DEMUXER_rtsp
           set_y FFMPEG_CUSTOM_PROTOCOL_tcp
@@ -117,6 +130,7 @@ jobs:
 
           set_y FFMPEG_CUSTOM_MUXER_mpegts
           set_y FFMPEG_CUSTOM_MUXER_mp4
+          set_y FFMPEG_CUSTOM_MUXER_segment
           
           make defconfig
 
@@ -127,14 +141,14 @@ jobs:
           echo "===== Packages ====="
           grep -E '^CONFIG_PACKAGE_(libffmpeg-custom|ffmpeg-custom|ffprobe-custom)=' .config
 
-          echo "===== HEVC ====="
-          grep -E '^CONFIG_FFMPEG_CUSTOM_(PATENTED|PARSER_hevc|DECODER_hevc)=' .config
+          echo "===== H264 / HEVC ====="
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(PATENTED|DECODER_h264|PARSER_h264|DECODER_hevc|PARSER_hevc)=' .config
 
           echo "===== RTSP input ====="
           grep -E '^CONFIG_FFMPEG_CUSTOM_(DEMUXER_rtsp|PROTOCOL_tcp)=' .config
 
           echo "===== Output ====="
-          grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4|MUXER_segment)=' .config
           echo "===== Unwanted packages ====="
           grep -E '^CONFIG_PACKAGE_(go2rtc|ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
 
