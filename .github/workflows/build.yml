@@ -49,6 +49,16 @@ jobs:
         run: |
           cd sdk
 
+          # Chỉ giữ các FFmpeg custom variants trong lần build này
+          FFMPEG_MK="feeds/packages/multimedia/ffmpeg/Makefile"
+
+          for pkg in ffmpeg ffprobe libffmpeg-audio-dec libffmpeg-full libffmpeg-mini; do
+            sed -i "/BuildPackage,${pkg}))/s/^/# custom-only: /" "$FFMPEG_MK"
+          done
+
+          echo "===== Active FFmpeg BuildPackage registrations ====="
+          grep -nE '^[[:space:]]*\$\(eval \$\(call BuildPackage,' "$FFMPEG_MK"
+      
           make defconfig
      
           # Tắt chế độ build hàng loạt package của SDK
