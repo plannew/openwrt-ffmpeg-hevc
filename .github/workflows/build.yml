@@ -153,8 +153,13 @@ jobs:
 
           grep -n -B8 -A2 'select PACKAGE_libgnutls' \
             tmp/.config-package.in || true
+          echo "===== FFmpeg Makefile lines 300-390 ====="
+          nl -ba feeds/packages/multimedia/ffmpeg/Makefile | sed -n '300,390p'
 
+          echo "===== FFmpeg Makefile lines 430-510 ====="
+          nl -ba feeds/packages/multimedia/ffmpeg/Makefile | sed -n '430,510p'
       - name: Build custom FFmpeg packages
+        if: ${{ false }}
         run: |
           cd sdk
           make package/feeds/packages/ffmpeg/compile V=s
