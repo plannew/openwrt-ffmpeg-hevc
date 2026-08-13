@@ -52,7 +52,7 @@ jobs:
           # Chỉ giữ các FFmpeg custom variants trong lần build này
           FFMPEG_MK="feeds/packages/multimedia/ffmpeg/Makefile"
           # Bump release để MX4200 nhận đây là bản nâng cấp mới
-          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=2/' "$FFMPEG_MK"
+          sed -i 's/^PKG_RELEASE:=1$/PKG_RELEASE:=3/' "$FFMPEG_MK"
 
           echo "===== FFmpeg package release ====="
           grep -n '^PKG_RELEASE:=' "$FFMPEG_MK"
@@ -64,6 +64,12 @@ jobs:
           # FFmpeg custom tối thiểu không cần zlib/libbz2
           sed -i 's/+libpthread +zlib +libbz2/+libpthread/' "$FFMPEG_MK"
           sed -i 's/--enable-zlib/--disable-zlib/' "$FFMPEG_MK"
+
+          # Segment muxer không được Kconfig custom giữ lại, ép trực tiếp cho custom variant
+          sed -i '/^ifeq ($(BUILD_VARIANT),custom)$/a\  FFMPEG_CONFIGURE += --enable-muxer=segment' "$FFMPEG_MK"
+
+          echo "===== Forced segment muxer ====="
+          grep -nF -A3 'ifeq ($(BUILD_VARIANT),custom)' "$FFMPEG_MK"
 
           echo "===== FFmpeg custom compression dependencies ====="
           grep -nE 'DEPENDS.*(zlib|libbz2)|--(enable|disable)-zlib' "$FFMPEG_MK" || true
@@ -130,7 +136,6 @@ jobs:
 
           set_y FFMPEG_CUSTOM_MUXER_mpegts
           set_y FFMPEG_CUSTOM_MUXER_mp4
-          set_y FFMPEG_CUSTOM_MUXER_segment
           
           make defconfig
 
@@ -148,7 +153,11 @@ jobs:
           grep -E '^CONFIG_FFMPEG_CUSTOM_(DEMUXER_rtsp|PROTOCOL_tcp)=' .config
 
           echo "===== Output ====="
-          grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4|MUXER_segment)=' .config
+          grep -E '^CONFIG_FFMPEG_CUSTOM_(PROTOCOL_file|MUXER_mpegts|MUXER_mp4)=' .config
+
+          echo "===== Forced segment muxer ====="
+          grep -nF -- '--enable-muxer=segment' feeds/packages/multimedia/ffmpeg/Makefile
+          
           echo "===== Unwanted packages ====="
           grep -E '^CONFIG_PACKAGE_(go2rtc|ffmpeg|ffprobe|libffmpeg-full|libffmpeg-mini|libffmpeg-audio-dec|libgnutls-dane|libunbound)=' .config || true
 
